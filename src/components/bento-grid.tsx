@@ -18,9 +18,9 @@ import CostSavings from "./cost-savings";
 import CarbonFootprintReduction from "./carbon-footprint-reduction";
 
 
-const res = await fetch("http://localhost:8000/stats/patients");
-const data = await res.json();
-console.log(data.total_patients);
+// const res = await fetch("http://localhost:8000/stats/patients");
+// const data = await res.json();
+// console.log(data.total_patients);
 
 export function BentoGridDemo() {
 return (
@@ -45,7 +45,7 @@ const items = [
 {
     title: "Current Reading (kWh)",
     description: "Last reading taken from the power meter.",
-    header: <StatValue value={data.total_patients} />,
+    header: <StatValue value={10} />,
     icon: <IconClipboardCopy className="h-4 w-4 text-neutral-200" />,
     className: "bg-[#393C67] border-none text-white",
 },
