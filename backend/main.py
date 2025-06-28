@@ -36,6 +36,25 @@ def get_actuals(limit: int = 24):
     # print("hmm", df)
     return [{"timestamp": row["timestamp"], "value": row["target_power"]} for _, row in df.iterrows()]
 
+@router.get("/api/current-reading")
+def get_current_reading():
+    conn = psycopg2.connect(
+        dbname="postgres",
+        user="postgres",
+        password="@Sid2003",
+        host="localhost",
+        port="5432"
+    )
+    df = pd.read_sql(
+        "SELECT timestamp, target_power FROM timeseries_data ORDER BY timestamp DESC LIMIT 1",
+        conn
+    )
+    conn.close()
+    if not df.empty:
+        return {"timestamp": df.iloc[0]["timestamp"], "value": df.iloc[0]["target_power"]}
+    else:
+        return {"timestamp": None, "value": None}
+
 @app.get("/")
 def read_root():
     return {"message": "FastAPI backend is running!"}
