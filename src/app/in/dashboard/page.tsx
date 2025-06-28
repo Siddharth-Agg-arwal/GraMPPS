@@ -1,13 +1,33 @@
+"use client"
+
+import React from "react";
 import { BentoGridDemo } from "@/components/bento-grid";
 
 export default function Dashboard() {
+    const [forecastData, setForecastData] = React.useState<any>(null);
+
+    React.useEffect(() => {
+        async function fetchForecast() {
+            const res = await fetch("http://localhost:8000/run-forecast");
+            const data = await res.json();
+            setForecastData(data);
+        }
+        fetchForecast();
+    }, []);
+
+    if (!forecastData) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div className="flex h-fit bg-[#242424] border-none">
             <main
                 className="pt-8 pr-24 pb-8"
                 style={{ width: "calc(100vw - 17rem)" }}
             >
-                <BentoGridDemo />
+                <BentoGridDemo
+                    forecastData={forecastData}
+                />
             </main>
         </div>
     );

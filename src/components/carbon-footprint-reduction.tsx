@@ -3,24 +3,12 @@
 import React from "react";
 import { IconLeaf, IconTrendingDown } from "@tabler/icons-react";
 
-export default function CarbonFootprintReduction() {
-const [carbonPercent, setCarbonPercent] = React.useState<number | null>(null);
-const [reductionPercent, setReductionPercent] = React.useState<number | null>(null);
-
-React.useEffect(() => {
-    async function fetchData() {
-    // Fetch from backend, adjust endpoint as needed
-    const res = await fetch("http://localhost:8000/run-forecast");
-    const data = await res.json();
-    // Assume backend returns { carbon_percent: 72.3, carbon_reduction_percent: 18.5 }
-    setCarbonPercent(data.carbon_percent ?? null);
-    setReductionPercent(data.carbon_reduction_percent ?? null);
-    }
-    fetchData();
-}, []);
+export default function CarbonFootprintReduction({ carbon }: { carbon: number }) {
+const carbonPercent = carbon;
+const reductionPercent = 18.5; // Assuming a static reduction percent for now
 
 return (
-    <div className="flex flex-col items-center justify-center p-2">
+    <div className="flex flex-col items-center justify-center p-2 h-full">
     <div className="flex items-center gap-2 mb-2">
         <IconLeaf className="w-8 h-8 text-green-400" />
         <span className="text-3xl font-bold text-green-400">

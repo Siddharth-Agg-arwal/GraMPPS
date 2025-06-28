@@ -25,21 +25,21 @@ const items = [
         url: "/in/live-feed",
         icon: Inbox,
     },
-    {
-        title: "Appointments",
-        url: "/in/appointments",
-        icon: Calendar,
-    },
-    {
-        title: "Patients",
-        url: "/in/patients",
-        icon: Search,
-    },
-    {
-        title: "Settings",
-        url: "/in/settings",
-        icon: Settings,
-    },
+    // {
+    //     title: "Appointments",
+    //     url: "/in/appointments",
+    //     icon: Calendar,
+    // },
+    // {
+    //     title: "Patients",
+    //     url: "/in/patients",
+    //     icon: Search,
+    // },
+    // {
+    //     title: "Settings",
+    //     url: "/in/settings",
+    //     icon: Settings,
+    // },
 ]
 
 export function AppSidebar() {

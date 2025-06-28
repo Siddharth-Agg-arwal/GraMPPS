@@ -52,7 +52,7 @@ function CustomLegendContent(props: any) {
   );
 }
 
-export function PowerChart() {
+export function PowerChart({ forecast }: { forecast: number[] }) {
   const [timeRange, setTimeRange] = React.useState("90d")
   type ChartDatum = { date: string; actual: number; forecast: number | null };
   const [chartData, setChartData] = React.useState<ChartDatum[]>([]);

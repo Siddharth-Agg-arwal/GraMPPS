@@ -10,18 +10,10 @@ const options = [
 { label: "Overall Savings", value: "overall" },
 ];
 
-export default function CostSavings() {
+export default function CostSavings({ cost }: { cost: number }) {
+  // Use the cost prop directly, remove fetch logic
 const [selected, setSelected] = React.useState(options[0].value);
-const [savings, setSavings] = React.useState<number | null>(null);
-
-React.useEffect(() => {
-    async function fetchSavings() {
-    const res = await fetch(`http://localhost:8000/run-forecast?savings_type=${selected}`);
-    const data = await res.json();
-    setSavings(typeof data.savings_percent === "number" ? data.savings_percent : null);
-    }
-    fetchSavings();
-}, [selected]);
+const savings = cost; // Directly use the cost prop
 
 const iconMap: Record<string, JSX.Element> = {
     weekly: <IconCalendar className="w-8 h-8 text-blue-400" />,
@@ -30,7 +22,7 @@ const iconMap: Record<string, JSX.Element> = {
 };
 
 return (
-    <div className="relative flex flex-col items-center justify-center p-2 w-full">
+    <div className="relative flex flex-col items-center justify-center p-2 w-full h-full">
     {/* Dropdown aligned to top right */}
     <div className="absolute top-2 right-2 z-10">
         <Dropdown>

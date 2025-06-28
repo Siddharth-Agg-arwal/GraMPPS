@@ -60,10 +60,11 @@ def run_forecast_and_estimate():
     input_df = prepare_input_df(context_df)
 
     # 2. Load model and pipeline
-    device = "cpu"
+    # device = "cpu"
     model = TinyTimeMixerForPrediction.from_pretrained(
         "ibm-granite/granite-timeseries-ttm-r2",
-        num_input_channels=1
+        num_input_channels=1,
+        device_map=None  # or remove device_map if present
     )
     pipeline = TimeSeriesForecastingPipeline(
         model=model,
@@ -72,7 +73,7 @@ def run_forecast_and_estimate():
         target_columns=["total_load_actual"],
         explode_forecasts=True,
         freq="h",
-        device=device
+        # device=device
     )
 
     # 3. Run forecast
@@ -95,7 +96,7 @@ def run_forecast_and_estimate():
 @router.get("/run-forecast")
 def run_forecast_endpoint():
     result = run_forecast_and_estimate()
-    print("Forecasting result:", result)
+    # print("Forecasting result:", result)
     return result
 
 # --- SCHEDULER SETUP ---
