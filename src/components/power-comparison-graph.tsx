@@ -51,6 +51,8 @@ export function PowerChart() {
       setChartData(data);
     }
     fetchData();
+    const interval = setInterval(fetchData, 5000); // refresh every 5 seconds
+    return () => clearInterval(interval);
   }, []);
 
   // Optionally filter by timeRange here

@@ -162,3 +162,58 @@ def run_forecast_custom_context(context_df, start_time, periods, freq):
     return {
         "forecast": forecast_values
     }
+
+def forecast_energy(df, pipeline):
+    """
+    - df: DataFrame with columns ['timestamp', 'total_load_actual']
+    - pipeline: a fitted TimeSeriesForecastingPipeline
+    Returns: DataFrame with ['timestamp', 'forecasted_power']
+    """
+    # 1. Hourly forecasts for 2017-10-31
+    start_hourly = pd.Timestamp("2017-10-31 00:00:00+00:00")
+    end_hourly = pd.Timestamp("2017-10-31 23:00:00+00:00")
+    hourly_index = pd.date_range(start=start_hourly, end=end_hourly, freq="1H")
+
+    # 2. 5-min forecasts for next day from 2017-11-01 00:00:00 to 2017-11-01 23:55:00
+    start_5min = pd.Timestamp("2017-11-01 00:00:00+00:00")
+    end_5min = pd.Timestamp("2017-11-01 23:55:00+00:00")
+    five_min_index = pd.date_range(start=start_5min, end=end_5min, freq="5min")
+
+    # 3. Prepare context (last 96 hours)
+    context_df = df.sort_values("timestamp").copy()
+    context_window = int(pd.Timedelta(hours=96) / pd.Timedelta("1H"))
+    history = context_df.iloc[-context_window:].copy()
+
+    # === 🔥 Normalize history ===
+    mean = history["total_load_actual"].mean()
+    std = history["total_load_actual"].std()
+    history["total_load_actual"] = (history["total_load_actual"] - mean) / std
+
+    # 4. Forecast for hourly
+    future_hourly = pd.DataFrame({
+        "timestamp": hourly_index,
+        "total_load_actual": pd.NA
+    })
+    inp_hourly = pd.concat([history[["timestamp", "total_load_actual"]], future_hourly], ignore_index=True)
+    results_hourly = pipeline(inp_hourly)
+    forecast_hourly = results_hourly.tail(len(hourly_index)).rename(
+        columns={"total_load_actual": "forecasted_power"}
+    )
+    forecast_hourly["forecasted_power"] = forecast_hourly["forecasted_power"] * std + mean
+
+    # 5. Forecast for 5-min
+    future_5min = pd.DataFrame({
+        "timestamp": five_min_index,
+        "total_load_actual": pd.NA
+    })
+    inp_5min = pd.concat([history[["timestamp", "total_load_actual"]], future_5min], ignore_index=True)
+    results_5min = pipeline(inp_5min)
+    forecast_5min = results_5min.tail(len(five_min_index)).rename(
+        columns={"total_load_actual": "forecasted_power"}
+    )
+    forecast_5min["forecasted_power"] = forecast_5min["forecasted_power"] * std + mean
+
+    # 6. Combine
+    forecast_df = pd.concat([forecast_hourly, forecast_5min], ignore_index=True)
+    forecast_df = forecast_df[["timestamp", "forecasted_power"]]
+    return forecast_df

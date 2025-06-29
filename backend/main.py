@@ -48,39 +48,31 @@ router = APIRouter()
 def get_power_comparison():
     print("DEBUG: /api/power-comparison called")
     conn = psycopg2.connect(**DB_CONFIG)
-    # For production, use this:
-    # now = datetime.utcnow()
-    # since = now - timedelta(days=1)
-    # print(f"DEBUG: Filtering data since {since} (UTC now: {now})")
 
-    # For current dataset, use fixed reference timestamp
-    reference = pd.to_datetime("2017-10-31 23:00:00+00:00")
-    since = reference - timedelta(days=1)
-    print(f"DEBUG: Filtering data since {since} (reference: {reference})")
-
+    # Get all actuals and forecasts
     actuals = pd.read_sql(
-        "SELECT timestamp, target_power FROM timeseries_data WHERE timestamp >= %s AND timestamp <= %s ORDER BY timestamp ASC",
-        conn,
-        params=[since, reference]
+        "SELECT timestamp, target_power FROM timeseries_data ORDER BY timestamp ASC",
+        conn
     )
-    print(f"DEBUG: Retrieved {len(actuals)} actual rows")
     forecasts = pd.read_sql(
-        "SELECT timestamp, predicted_value FROM forecast WHERE timestamp >= %s AND timestamp <= %s",
-        conn,
-        params=[since, reference]
+        "SELECT timestamp, predicted_value FROM forecast ORDER BY timestamp ASC",
+        conn
     )
-    print(f"DEBUG: Retrieved {len(forecasts)} forecast rows")
     conn.close()
+    actuals = actuals.set_index("timestamp")
     forecasts = forecasts.set_index("timestamp")
+
+    # Only keep timestamps present in BOTH tables
+    common_timestamps = actuals.index.intersection(forecasts.index)
+
     result = []
-    for _, row in actuals.iterrows():
-        ts = row["timestamp"]
-        actual = row["target_power"]
-        forecast = forecasts["predicted_value"].get(ts, None)
+    for ts in common_timestamps:
+        actual = actuals.at[ts, "target_power"]
+        forecast = forecasts.at[ts, "predicted_value"]
         hour = pd.to_datetime(ts).hour
         threshold = get_threshold_base(hour)
         result.append({
-            "timestamp": str(ts),  # Ensure string for JSON serialization
+            "timestamp": str(ts),
             "actual": actual,
             "forecast": forecast,
             "threshold": threshold

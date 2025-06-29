@@ -1,6 +1,5 @@
 import pandas as pd
 import psycopg2
-from forecast import run_forecast_custom_context
 
 DB_CONFIG = dict(
     dbname="postgres",
@@ -15,6 +14,10 @@ FORECAST_TABLE = "forecast"
 def create_forecast_table():
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
+    # Drop the pre-existing forecast table if it exists
+    cur.execute(f"DROP TABLE IF EXISTS {FORECAST_TABLE};")
+    conn.commit()
+    # Create the forecast table
     cur.execute(f"""
         CREATE TABLE IF NOT EXISTS {FORECAST_TABLE} (
             timestamp TIMESTAMPTZ PRIMARY KEY,
@@ -26,32 +29,14 @@ def create_forecast_table():
     cur.close()
     conn.close()
 
-def generate_forecast_and_store(csv_path):
+def populate_forecast_from_csv(csv_path):
     create_forecast_table()
-    # Load context from train.csv
     df = pd.read_csv(csv_path, parse_dates=["timestamp"])
-    context_df = df[["timestamp", "target:Power"]].rename(columns={"target:Power": "total_load_actual"})
-    last_actual_ts = context_df["timestamp"].max()
-    print("Last actual timestamp in CSV:", last_actual_ts)
-
-    periods = 288
-    freq = "5min"
-    start_time = last_actual_ts + pd.Timedelta(minutes=5)
-
-    # Run forecast using the new function
-    result = run_forecast_custom_context(context_df, start_time, periods, freq)
-    forecast_values = result["forecast"]
-
-    forecast_times = pd.date_range(
-        start=start_time,
-        periods=periods,
-        freq=freq
-    )
-
-    # Store in forecast table
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
-    for ts, pred in zip(forecast_times, forecast_values):
+    for _, row in df.iterrows():
+        ts = row["timestamp"]
+        pred = row["forecasted_power"]
         print(f"Inserting: {ts}, {pred}")
         try:
             cur.execute(f"""
@@ -64,8 +49,20 @@ def generate_forecast_and_store(csv_path):
     conn.commit()
     cur.close()
     conn.close()
-    print(f"Inserted/updated {len(forecast_times)} forecast rows for the next day.")
+    print(f"Inserted/updated {len(df)} forecast rows.")
+
+def print_forecast_table():
+    conn = psycopg2.connect(**DB_CONFIG)
+    df = pd.read_sql(
+        f"SELECT timestamp, predicted_value FROM {FORECAST_TABLE} ORDER BY timestamp ASC",
+        conn
+    )
+    conn.close()
+    print("All rows in forecast table:")
+    print(df.to_string(index=False))
 
 if __name__ == "__main__":
-    csv_path = "train.csv"
-    generate_forecast_and_store(csv_path)
+    # Commented out all other logic for running prediction using SQL data
+    # generate_forecast_and_store("train.csv")
+    populate_forecast_from_csv("two_day_5min.csv")
+    print_forecast_table()
