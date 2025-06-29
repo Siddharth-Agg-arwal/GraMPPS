@@ -26,21 +26,21 @@ DB_CONFIG = dict(
 
 def get_threshold_base(hour: int) -> float:
     if 0 <= hour < 6:
-        return 1000
-    elif 6 <= hour < 8:
-        return 1500
-    elif 8 <= hour < 12:
-        return 2000
-    elif 12 <= hour < 14:
-        return 3000
-    elif 14 <= hour < 18:
-        return 5000
-    elif 18 <= hour < 21:
         return 4000
+    elif 6 <= hour < 8:
+        return 5500
+    elif 8 <= hour < 12:
+        return 5000
+    elif 12 <= hour < 14:
+        return 6000
+    elif 14 <= hour < 18:
+        return 8000
+    elif 18 <= hour < 21:
+        return 7000
     elif 21 <= hour < 24:
-        return 2500
+        return 5500
     else:
-        return 1000
+        return 4000
 
 router = APIRouter()
 

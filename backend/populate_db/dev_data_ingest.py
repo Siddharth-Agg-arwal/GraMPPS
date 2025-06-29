@@ -68,4 +68,4 @@ def append_one_row():
 if __name__ == "__main__":
     while True:
         append_one_row()
-        time.sleep(20)  # 5 minutes
+        time.sleep(5)  # 5 minutes

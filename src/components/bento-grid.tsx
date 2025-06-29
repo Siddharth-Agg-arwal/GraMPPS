@@ -66,7 +66,31 @@ export function BentoGridDemo({ forecastTable }: { forecastTable: { timestamp: s
         {
             title: "Power Consumption Status",
             description: "Current power consumption is sub-optimal or not.",
-            header: <PowerStatus status="Efficient" />,
+            header: (
+                <PowerStatus
+                    status={
+                        currentReading !== null && forecastedValue !== null && currentTimestamp
+                            ? (() => {
+                                // Get hour from timestamp (assume UTC)
+                                const hour = new Date(currentTimestamp).getUTCHours();
+                                // Threshold logic from main.py
+                                let threshold = 1000;
+                                if (hour >= 0 && hour < 6) threshold = 1000;
+                                else if (hour >= 6 && hour < 8) threshold = 1500;
+                                else if (hour >= 8 && hour < 12) threshold = 2000;
+                                else if (hour >= 12 && hour < 14) threshold = 3000;
+                                else if (hour >= 14 && hour < 18) threshold = 5000;
+                                else if (hour >= 18 && hour < 21) threshold = 4000;
+                                else if (hour >= 21 && hour < 24) threshold = 2500;
+
+                                if (currentReading > forecastedValue + threshold) return "Excessive";
+                                if (currentReading > forecastedValue) return "Moderate";
+                                return "Efficient";
+                            })()
+                            : "Efficient"
+                    }
+                />
+            ),
             icon: <IconSignature className="h-4 w-4 text-neutral-500" />,
             className: "bg-[#2B2F47] border-none text-white",
         },
@@ -80,14 +104,20 @@ export function BentoGridDemo({ forecastTable }: { forecastTable: { timestamp: s
         {
             title: "Cost Savings",
             description: "See your current cost savings compared to baseline.",
-            header: <CostSavings cost={20} />,
+            header: <CostSavings
+  percent={((5868502.49 - 5682610.97) / 5868502.49) * 100}
+  diff={5868502.49 - 5682610.97}
+/>,
             icon: <IconPigMoney className="h-4 w-4 text-green-400" />,
             className: "bg-[#4409A1] border-none text-white md:col-span-2",
         },
         {
             title: "Carbon Footprint Reduction",
             description: "Your current carbon footprint and reduction achieved.",
-            header: <CarbonFootprintReduction carbon={30} />,
+            header: <CarbonFootprintReduction
+  percent={((601521.51 - 582467.62) / 601521.51) * 100}
+  diff={601521.51 - 582467.62}
+/>,
             icon: <IconBoxAlignRightFilled className="h-4 w-4 text-green-400" />,
             className: "bg-[#393C67] border-none text-white",
         },
