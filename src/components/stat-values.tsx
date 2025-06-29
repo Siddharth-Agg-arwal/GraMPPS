@@ -1,4 +1,4 @@
-export default function StatValue({ value }: { value: number }) {
+export default function StatValue({ value }: { value: string }) {
     return(
         <div>
             <div className=" flex items-center align-middle justify-center gap-2 p-15">

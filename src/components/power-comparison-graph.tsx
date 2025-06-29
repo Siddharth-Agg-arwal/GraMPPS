@@ -118,10 +118,13 @@ export function PowerChart() {
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
+                return date.toLocaleString("en-GB", {
                   month: "short",
-                  day: "numeric",
+                  day: "2-digit",
                   hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: "UTC"
                 });
               }}
             />
@@ -130,10 +133,14 @@ export function PowerChart() {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
+                    const date = new Date(value);
+                    return date.toLocaleString("en-GB", {
                       month: "short",
-                      day: "numeric",
+                      day: "2-digit",
                       hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: "UTC"
                     });
                   }}
                   indicator="dot"

@@ -48,18 +48,24 @@ export function BentoGridDemo({ forecastTable }: { forecastTable: { timestamp: s
         }
     }, [currentTimestamp, forecastTable]);
 
+    // Format numbers with commas
+    const formatNumber = (value: number | null) =>
+        value !== null && !isNaN(value)
+            ? value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+            : "-";
+
     const items = [
         {
             title: "Current Reading (kWh)",
             description: "Last reading taken from the power meter.",
-            header: <StatValue value={currentReading ?? -1} />,
+            header: <StatValue value={formatNumber(currentReading)} />,
             icon: <IconClipboardCopy className="h-4 w-4 text-neutral-200" />,
             className: "bg-[#393C67] border-none text-white",
         },
         {
             title: "Forecasted Consumption (kWh)",
             description: "Predicted power consumption for current time.",
-            header: <StatValue value={forecastedValue ?? -1} />,
+            header: <StatValue value={formatNumber(forecastedValue)} />,
             icon: <IconFileBroken className="h-4 w-4 text-neutral-500" />,
             className: "bg-[#4409A1] border-none text-white",
         },

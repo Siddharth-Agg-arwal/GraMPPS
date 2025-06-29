@@ -1,8 +1,9 @@
 import pandas as pd
 import psycopg2
 
-# Load CSV
-df = pd.read_csv('train.csv')
+# Load CSV and ensure UTC
+df = pd.read_csv('train.csv', parse_dates=['timestamp'])
+df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)  # Force UTC
 
 # Connect to PostgreSQL
 conn = psycopg2.connect(
@@ -14,9 +15,10 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-# Create table with columns matching your CSV
+cur.execute("DROP TABLE IF EXISTS timeseries_data;")
+conn.commit()
 cur.execute("""
-    CREATE TABLE IF NOT EXISTS timeseries_data (
+    CREATE TABLE timeseries_data (
         id SERIAL PRIMARY KEY,
         timestamp TIMESTAMPTZ,
         target_power FLOAT,
@@ -55,3 +57,18 @@ conn.commit()
 cur.close()
 conn.close()
 print("Database populated!")
+
+def print_all_timeseries_data():
+    conn = psycopg2.connect(
+        dbname="postgres",
+        user="postgres",
+        password="@Sid2003",
+        host="localhost",
+        port="5432"
+    )
+    df = pd.read_sql("SELECT * FROM timeseries_data ORDER BY timestamp ASC", conn)
+    conn.close()
+    print(df.to_string(index=False))
+
+if __name__ == "__main__":
+    print_all_timeseries_data()

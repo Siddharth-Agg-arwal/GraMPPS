@@ -29,38 +29,38 @@ const floorLayouts = [
   [
     { name: "Reception", color: "bg-[#393C67] text-white", colSpan: 2 },
     { name: "Waiting Area", color: "bg-[#4409A1] text-white" },
-    { name: "ICU", color: "bg-[#2B2F47] text-white", rowSpan: 2 },
-    { name: "Ward A", color: "bg-[#BD3CD8]" },
-    { name: "Ward B", color: "bg-[#4409A1]" },
-    { name: "Operation Theater", color: "bg-[#2B2F47]" },
+    { name: "Cafeteria", color: "bg-[#2B2F47] text-white", rowSpan: 2 },
+    { name: "Conference Hall", color: "bg-[#BD3CD8]" },
+    { name: "Lab 1", color: "bg-[#4409A1]" },
+    { name: "Lab 2", color: "bg-[#2B2F47]" },
   ],
   // First Floor
   [
-    { name: "Lab", color: "bg-[#393C67] text-white", colSpan: 1 },
-    { name: "Pharmacy", color: "bg-[#4409A1] text-white" },
-    { name: "Ward C", color: "bg-[#2B2F47] text-white" },
-    { name: "Ward D", color: "bg-[#4409A1]", rowSpan: 2 },
-    { name: "Ward E", color: "bg-[#2B2F47]", colSpan: 2 },
-    { name: "Cafeteria", color: "bg-[#BD3CD8]" },
+    { name: "Lab 3", color: "bg-[#393C67] text-white", colSpan: 1 },
+    { name: "Recreation Area", color: "bg-[#4409A1] text-white" },
+    { name: "Kitchen", color: "bg-[#2B2F47] text-white" },
+    { name: "Lab 4", color: "bg-[#4409A1]", rowSpan: 2 },
+    { name: "Lab 5", color: "bg-[#2B2F47]", colSpan: 2 },
+    { name: "Common Area", color: "bg-[#BD3CD8]" },
   ],
   // Second Floor (new)
   [
     { name: "Admin Office", color: "bg-[#393C67] text-white", colSpan: 2 },
     { name: "Conference Room", color: "bg-[#4409A1] text-white" },
     { name: "Records", color: "bg-[#2B2F47] text-white", rowSpan: 2 },
-    { name: "Ward F", color: "bg-[#BD3CD8]" },
-    { name: "Ward G", color: "bg-[#4409A1]", colSpan:2 },
+    { name: "Database Room", color: "bg-[#BD3CD8]" },
+    { name: "Supercomputer Station", color: "bg-[#4409A1]", colSpan:2 },
     // { name: "Pantry", color: "bg-[#2B2F47]" },
   ],
 ];
 
 const idleSectionsPerFloor: string[][] = [
   // Ground Floor
-  ["Reception", "Ward A"],
+  ["Reception", "Lab 1"],
   // First Floor
-  ["Lab", "Cafeteria"],
+  ["Lab 4", "Common Area"],
   // Second Floor (new)
-  ["Admin Office", "Pantry"],
+  ["Admin Office", "Records", "Conference Room"],
 ];
 
 const floorNames = ["Ground Floor", "First Floor", "Second Floor"];

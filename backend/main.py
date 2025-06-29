@@ -46,25 +46,18 @@ router = APIRouter()
 
 @router.get("/api/power-comparison")
 def get_power_comparison():
-    print("DEBUG: /api/power-comparison called")
     conn = psycopg2.connect(**DB_CONFIG)
-
-    # Get all actuals and forecasts
-    actuals = pd.read_sql(
-        "SELECT timestamp, target_power FROM timeseries_data ORDER BY timestamp ASC",
-        conn
-    )
-    forecasts = pd.read_sql(
-        "SELECT timestamp, predicted_value FROM forecast ORDER BY timestamp ASC",
-        conn
-    )
+    actuals = pd.read_sql("SELECT timestamp, target_power FROM timeseries_data", conn)
+    forecasts = pd.read_sql("SELECT timestamp, predicted_value FROM forecast", conn)
     conn.close()
+
+    # Ensure UTC for both DataFrames
+    actuals['timestamp'] = pd.to_datetime(actuals['timestamp'], utc=True)
+    forecasts['timestamp'] = pd.to_datetime(forecasts['timestamp'], utc=True)
+
     actuals = actuals.set_index("timestamp")
     forecasts = forecasts.set_index("timestamp")
-
-    # Only keep timestamps present in BOTH tables
     common_timestamps = actuals.index.intersection(forecasts.index)
-
     result = []
     for ts in common_timestamps:
         actual = actuals.at[ts, "target_power"]
@@ -77,9 +70,6 @@ def get_power_comparison():
             "forecast": forecast,
             "threshold": threshold
         })
-    print(f"DEBUG: Returning {len(result)} rows to frontend")
-    if len(result) > 0:
-        print("DEBUG: First row sample:", result[0])
     return result
 
 @router.get("/api/actuals")
