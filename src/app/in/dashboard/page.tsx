@@ -4,18 +4,22 @@ import React from "react";
 import { BentoGridDemo } from "@/components/bento-grid";
 
 export default function Dashboard() {
-    const [forecastData, setForecastData] = React.useState<any>(null);
+    const [forecastTable, setForecastTable] = React.useState<any[]>([]);
 
     React.useEffect(() => {
-        async function fetchForecast() {
-            const res = await fetch("http://localhost:8000/run-forecast");
-            const data = await res.json();
-            setForecastData(data);
+        async function fetchData() {
+            try {
+                const res = await fetch("http://localhost:8000/api/forecast-table");
+                const forecastTableData = await res.json();
+                setForecastTable(forecastTableData);
+            } catch (error) {
+                console.error("Dashboard fetch error:", error);
+            }
         }
-        fetchForecast();
+        fetchData();
     }, []);
 
-    if (!forecastData) {
+    if (forecastTable.length === 0) {
         return <div>Loading...</div>;
     }
 
@@ -26,7 +30,7 @@ export default function Dashboard() {
                 style={{ width: "calc(100vw - 17rem)" }}
             >
                 <BentoGridDemo
-                    forecastData={forecastData}
+                    forecastTable={forecastTable}
                 />
             </main>
         </div>

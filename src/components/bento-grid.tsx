@@ -22,29 +22,31 @@ import CarbonFootprintReduction from "./carbon-footprint-reduction";
 // const data = await res.json();
 // console.log(data.total_patients);
 
-export function BentoGridDemo({ forecastData }: { forecastData: any }) {
+export function BentoGridDemo({ forecastTable }: { forecastTable: { timestamp: string, value: number }[] }) {
     const [currentReading, setCurrentReading] = React.useState<number | null>(null);
+    const [currentTimestamp, setCurrentTimestamp] = React.useState<string | null>(null);
     const [forecastedValue, setForecastedValue] = React.useState<number | null>(null);
 
     React.useEffect(() => {
-        async function fetchCurrentReadingAndForecast() {
+        async function fetchCurrentReading() {
             const res = await fetch("http://localhost:8000/api/current-reading");
             const data = await res.json();
-            // Trim value to 2 decimal places if it's a number
             const value = typeof data.value === "number" ? Number(data.value.toFixed(2)) : data.value;
             setCurrentReading(value);
-
-            // Find the forecasted value closest to the current reading's timestamp
-            if (forecastData && Array.isArray(forecastData.forecast) && forecastData.forecast.length > 0) {
-                // If you have the index or timestamp mapping, use that.
-                // For now, assume the first forecast value is the next value after the latest actual.
-                setForecastedValue(Number(forecastData.forecast[0]?.toFixed(2)));
-            }
+            setCurrentTimestamp(data.timestamp);
         }
-        fetchCurrentReadingAndForecast();
-        const interval = setInterval(fetchCurrentReadingAndForecast, 5000); // poll every 5s for demo, or 5min for prod
+        fetchCurrentReading();
+        const interval = setInterval(fetchCurrentReading, 5000); // poll every 5s for demo, or 5min for prod
         return () => clearInterval(interval);
-    }, [forecastData]);
+    }, []);
+
+    React.useEffect(() => {
+        if (currentTimestamp && forecastTable && forecastTable.length > 0) {
+            // Find the forecasted value for the current reading's timestamp
+            const found = forecastTable.find(row => row.timestamp === currentTimestamp);
+            setForecastedValue(found ? Number(found.value.toFixed(2)) : null);
+        }
+    }, [currentTimestamp, forecastTable]);
 
     const items = [
         {
@@ -71,21 +73,21 @@ export function BentoGridDemo({ forecastData }: { forecastData: any }) {
         {
             title: "Live Actual and Forecasted Power Consumption",
             description: "Graphs comparing the forecasted expenditure and actual power being used.",
-            header: <PowerChart forecast={forecastData.forecast} />,
+            header: <PowerChart />,
             icon: <IconTableColumn className="h-4 w-4 text-neutral-500" />,
             className: "bg-[#2B2F47] md:col-span-3 md:row-span-2 border-none text-white",
         },
         {
             title: "Cost Savings",
             description: "See your current cost savings compared to baseline.",
-            header: <CostSavings cost={forecastData.cost} />,
+            header: <CostSavings cost={20} />,
             icon: <IconPigMoney className="h-4 w-4 text-green-400" />,
             className: "bg-[#4409A1] border-none text-white md:col-span-2",
         },
         {
             title: "Carbon Footprint Reduction",
             description: "Your current carbon footprint and reduction achieved.",
-            header: <CarbonFootprintReduction carbon={forecastData.carbon} />,
+            header: <CarbonFootprintReduction carbon={30} />,
             icon: <IconBoxAlignRightFilled className="h-4 w-4 text-green-400" />,
             className: "bg-[#393C67] border-none text-white",
         },
